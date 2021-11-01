@@ -18,12 +18,29 @@ class Voxel(Button):
 
 app = Ursina()
 
-for z in range(8):
-    for x in range(8):
-        voxel = Voxel((x*1.5, 0, z*1.5))
-        voxel.rotation_y = 90
+maplist = [[i+1 for i in range(13)]]+[[1,'x','x','x',5,'x','x','x',9,'x','x','x',13] for i in range(3)] 
+print(maplist)
 
-player = SkyViewCamera(y=2, origin_y=3)
+num = 1
+
+for i in maplist:
+    for j in i:
+        if str(j) == 'x':
+            print(x_num)
+            if x_num == 5:
+                voxel = Voxel((7*1.5, 0, 3*1.5))
+                voxel.rotation_y = 90
+                voxel.scale=1.5*3
+                voxel.highlight_color = color.color(30,1,1) 
+                x_num = 0
+            x_num+=1
+        else:
+            voxel = Voxel((j*1.5, 0, num*1.5))
+            voxel.rotation_y = 90
+    num+=1
+
+
+player = SkyViewCamera(y=5, origin_y=10)
 # ground = Entity(model='plane', scale=20, texture='white_cube', texture_scale=(20,20,20), collider='plane')
 
 app.run()
