@@ -1,6 +1,7 @@
 from ursina import *
 from ursina import texture
 from ursina import collider
+from ursina import hit_info
 from ursina.prefabs.first_person_controller import FirstPersonController
 from SkyViewCamera import *
 
@@ -13,34 +14,40 @@ class Voxel(Button):
             texture='white_cube',
             color=color.color(0,0,random.uniform(0.9,1)),
             highlight_color=color.color(0,0,0.9),
-            scale=1.5
+            scale=1.5,
         )
+    def on_mouse_enter(self):
+        self.scale=1.5*6
+        self.show()
+
+    def on_mouse_exit(self):
+        self.scale=1.5
 
 app = Ursina()
 
-maplist = [[i+1 for i in range(13)]]+[[1,'x','x','x',5,'x','x','x',9,'x','x','x',13] for i in range(3)] 
-print(maplist)
+maplist = []
+for z in range(13):
+    map_m = []
+    for x in range(13):
+        voxel = Voxel((x*1.5, 0, z*1.5))
+        voxel.collider = 'box'
+        voxel.collider = BoxCollider(voxel, center=(0,0,0), size=(0.5,0,0.5))
+        voxel.rotation_y = 90
+        voxel.visible = True
+        map_m.append(voxel)
+    maplist += [map_m]
 
-num = 1
-
-for i in maplist:
-    for j in i:
-        if str(j) == 'x':
-            print(x_num)
-            if x_num == 5:
-                voxel = Voxel((7*1.5, 0, 3*1.5))
-                voxel.rotation_y = 90
-                voxel.scale=1.5*3
-                voxel.highlight_color = color.color(30,1,1) 
-                x_num = 0
-            x_num+=1
-        else:
-            voxel = Voxel((j*1.5, 0, num*1.5))
-            voxel.rotation_y = 90
-    num+=1
-
+def update():
+    for i in maplist:
+        for j in i:
+            if j.intersects():
+                j.hide()
+            else:
+                j.show()
+    #hit_info = voxel.intersects()
+    #if hit_info.hit:
+    #    voxel.hide()
 
 player = SkyViewCamera(y=5, origin_y=10)
-# ground = Entity(model='plane', scale=20, texture='white_cube', texture_scale=(20,20,20), collider='plane')
 
 app.run()
