@@ -7,6 +7,7 @@ from SkyViewCamera import *
 
 class Voxel(Button):
     def __init__(self, position=(0,0,0)):
+        self.on_mouse_enter_value = False
         super().__init__(
             parent=scene,
             position=position,
@@ -16,12 +17,12 @@ class Voxel(Button):
             highlight_color=color.color(0,0,0.9),
             scale=1.5,
         )
-    def on_mouse_enter(self):
-        self.scale=1.5*6
-        self.show()
 
+    def on_mouse_enter(self):
+        self.on_mouse_enter_value = True
+    
     def on_mouse_exit(self):
-        self.scale=1.5
+        self.on_mouse_enter_value = False
 
 app = Ursina()
 
@@ -30,20 +31,30 @@ for z in range(13):
     map_m = []
     for x in range(13):
         voxel = Voxel((x*1.5, 0, z*1.5))
-        voxel.collider = 'box'
-        voxel.collider = BoxCollider(voxel, center=(0,0,0), size=(0.5,0,0.5))
         voxel.rotation_y = 90
-        voxel.visible = True
         map_m.append(voxel)
     maplist += [map_m]
 
+def test_maplist_error(map_position):
+    pass
+
 def update():
+    z=0 
     for i in maplist:
+        x=0
         for j in i:
-            if j.intersects():
-                j.hide()
+            if j.on_mouse_enter_value:
+                print('x:',str(x)+',', 'z:',str(z))
+                m = maplist
+                # test_maplist_error 함수 정의해서 에러 걸러내게 만드셈
+                # m[z][x], m[z+1][x], m[z-1][x], m[z][x+1], m[z][x-1], m[z+1][x+1], m[z+1][x-1], m[z-1][x+1], m[z-1][x-1]
+                
             else:
                 j.show()
+            x+=1
+        z+=1
+
+
     #hit_info = voxel.intersects()
     #if hit_info.hit:
     #    voxel.hide()
