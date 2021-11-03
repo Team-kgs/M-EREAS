@@ -18,8 +18,6 @@ class Main_box(Button):
     def on_click(self):
         self.open_field = False
         print('click moving field!!')
-        
-
 
 class Voxel(Button):
     def __init__(self, position=(0,0,0)):
@@ -43,6 +41,19 @@ class Voxel(Button):
         self.scale=1.5
         self.lock_on_mouse = False
 
+class Billding(Button):
+    def __init__(self):
+        super().__init__(
+            model='cube',
+            color=color.color(0,0,0, 0.66),
+            scale_y=1.1,
+            position=(0,0.55,0),
+            highlight_color=color.color(0,0,0, 0.66)
+        )
+    
+    def on_click(self):
+        pass # 부동상 매매(건물 클릭)
+
 app = Ursina()
 
 maplist = []
@@ -58,6 +69,8 @@ for z in range(13):
     maplist += [map_m]
 
 main_box = Main_box()
+store = Billding()
+store.parent = main_box
 
 def update():
     x = 0
@@ -75,6 +88,7 @@ def update():
                         main_box.position = j.po
             else:
                 j.on_mouse_exit()
+                store.highlight_color=color.color(0,0,0,0.50)
             z += 1
         x+=1
     
