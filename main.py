@@ -5,6 +5,7 @@ from SkyViewCamera import *
 
 class Main_box(Button):
     def __init__(self):
+        self.open_field = True
         super().__init__(
             parent=scene,
             model='plane',
@@ -15,7 +16,9 @@ class Main_box(Button):
         )
     
     def on_click(self):
-        print('dd')
+        self.open_field = False
+        print('click moving field!!')
+        
 
 
 class Voxel(Button):
@@ -61,13 +64,17 @@ def update():
     for i in maplist:
         z = 0
         for j in i:
-            if j.intersects():
-                j.hide()
+            if main_box.open_field:
+                if j.intersects():
+                    j.hide()
+                else:
+                    j.show()
+                
+                if x >= 1 and x <= 11 and z >= 1 and z <= 11:
+                    if j.lock_on_mouse:
+                        main_box.position = j.po
             else:
-                j.show()
-            if x >= 1 and x <= 11 and z >= 1 and z <= 11:
-                if j.lock_on_mouse:
-                    main_box.position = j.po
+                j.on_mouse_exit()
             z += 1
         x+=1
     
