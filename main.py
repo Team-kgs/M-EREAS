@@ -1,6 +1,7 @@
 from ursina import *
 from ursina import texture
 from ursina import collider
+from ursina import text
 from SkyViewCamera import *
 
 class Main_box(Button):
@@ -41,8 +42,10 @@ class Voxel(Button):
         self.scale=1.5
         self.lock_on_mouse = False
 
-class Billding(Button):
+class Fake_Building(Button):
     def __init__(self):
+        self.built_billding = False
+        self.go_to_R_store = False
         super().__init__(
             model='cube',
             color=color.color(0,0,0, 0.66),
@@ -52,7 +55,23 @@ class Billding(Button):
         )
     
     def on_click(self):
-        pass # 부동상 매매(건물 클릭)
+        if self.built_billding:
+            self.remove()
+            self.go_to_R_store = True
+        print('click')
+    
+class store_Building(Entity):
+    def __init__(self):
+        super().__init__(
+            parent=scene,
+            model='cube',
+            texture='white_cube',
+            color=color.color(0,0,random.uniform(0.9,1)),
+            highlight_color=color.color(0,0,0.9),
+            scale_y=1.1,
+            position=(0,0.55,0)
+        )
+    
 
 app = Ursina()
 
@@ -69,8 +88,12 @@ for z in range(13):
     maplist += [map_m]
 
 main_box = Main_box()
-store = Billding()
-store.parent = main_box
+F_store = Fake_Building()
+F_store.parent = main_box
+R_store = store_Building()
+R_store.parent = main_box
+R_store.hide()
+McDonald_text = Text(text='McDonald', parent=R_store, position=(-0.14, 0.7))
 
 def update():
     x = 0
@@ -88,7 +111,10 @@ def update():
                         main_box.position = j.po
             else:
                 j.on_mouse_exit()
-                store.highlight_color=color.color(0,0,0,0.50)
+                F_store.highlight_color=color.color(0,0,0,0.50)
+                F_store.built_billding = True
+                if F_store.go_to_R_store:
+                    R_store.show()
             z += 1
         x+=1
     
@@ -96,6 +122,6 @@ def update():
     #if hit_info.hit:
     #    voxel.hide()
 
-player = SkyViewCamera(y=5, origin_y=10)
+player = SkyViewCamera(x=5, y=7, z=-3, origin_y=10, rotation=(30,10,0))
 
 app.run()
