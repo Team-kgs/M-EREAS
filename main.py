@@ -2,6 +2,7 @@ from ursina import *
 from ursina import texture
 from ursina import collider
 from ursina import text
+from ursina.prefabs.first_person_controller import FirstPersonController
 from SkyViewCamera import *
 
 class Main_box(Button):
@@ -93,35 +94,45 @@ F_store.parent = main_box
 R_store = store_Building()
 R_store.parent = main_box
 R_store.hide()
-McDonald_text = Text(text='McDonald', parent=R_store, position=(-0.14, 0.7))
+McDonald_text = Text(text='McDonald', parent=R_store, position=(-0.14, 0.7), scale=3)
+player = SkyViewCamera(x=5, y=7, z=-3, origin_y=10, rotation=(30,10,0))
+
+FPS_player_lock = False
 
 def update():
-    x = 0
-    for i in maplist:
-        z = 0
-        for j in i:
-            if main_box.open_field:
-                if j.intersects():
-                    j.hide()
+    if FPS_player_lock == False:
+        x = 0
+        for i in maplist:
+            z = 0
+            for j in i:
+                if main_box.open_field:
+                    if j.intersects():
+                        j.hide()
+                    else:
+                        j.show()
+                    
+                    if x >= 1 and x <= 11 and z >= 1 and z <= 11:
+                        if j.lock_on_mouse:
+                            main_box.position = j.po
                 else:
-                    j.show()
-                
-                if x >= 1 and x <= 11 and z >= 1 and z <= 11:
-                    if j.lock_on_mouse:
-                        main_box.position = j.po
-            else:
-                j.on_mouse_exit()
-                F_store.highlight_color=color.color(0,0,0,0.50)
-                F_store.built_billding = True
-                if F_store.go_to_R_store:
-                    R_store.show()
-            z += 1
-        x+=1
+                    j.on_mouse_exit()
+                    F_store.highlight_color=color.color(0,0,0,0.50)
+                    F_store.built_billding = True
+                    if F_store.go_to_R_store:
+                        R_store.show()
+                z += 1
+            x+=1
     
     #hit_info = voxel.intersects()
     #if hit_info.hit:
     #    voxel.hide()
 
-player = SkyViewCamera(x=5, y=7, z=-3, origin_y=10, rotation=(30,10,0))
+def input(key):
+    if held_keys['control'] and key == 'r':
+        FirstPersonController()
+        for i in maplist:
+            for j in i:
+                j.collider = BoxCollider(j, center=(0,0,0), size=(1.5, 0, 1.5))
+
 
 app.run()
