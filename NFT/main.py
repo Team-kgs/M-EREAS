@@ -12,6 +12,7 @@ transaaction1 ={
 Kcoin.add_block(transaaction1)
 print(Kcoin.chain)
 print(Kcoin.verify_blockchain())
+print(Kcoin.chain[0].hash)
 
 '''
 Kcoin.chain[0].transactions = {

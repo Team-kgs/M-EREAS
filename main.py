@@ -4,6 +4,10 @@ from ursina import collider
 from ursina import text
 from ursina.prefabs.first_person_controller import FirstPersonController
 from SkyViewCamera import *
+import requests
+import json
+
+Text.default_font = './assets/BMJUA_ttf.ttf'
 
 class Main_box(Button):
     def __init__(self):
@@ -19,7 +23,6 @@ class Main_box(Button):
     
     def on_click(self):
         self.open_field = False
-        print('click moving field!!')
 
 class Voxel(Button):
     def __init__(self, position=(0,0,0)):
@@ -43,14 +46,28 @@ class Voxel(Button):
         self.scale=1.5
         self.lock_on_mouse = False
 
+class alarm_window(Text):
+    def __init__(self, alarm_str):
+        super().__init__(
+            parent=camera.ui,
+            text=alarm_str,
+            position=(-.425, .1)
+        )
+
+def show_alarm_window(alarm_str):
+    alarm = alarm_window(alarm_str)
+    alarm.create_background(padding=0.05, color=color.black66)  
+    Button(model='quad', parent=alarm, scale=(0.25, 0.1), origin = (-.5,.5), color=color.black66)
+
 class Fake_Building(Button):
     def __init__(self):
         self.built_billding = False
         self.go_to_R_store = False
+        self.render_position = (0, 0)
         super().__init__(
             model='cube',
             color=color.color(0,0,0, 0.66),
-            scale_y=1.1,
+            scale_y=1.1, 
             position=(0,0.55,0),
             highlight_color=color.color(0,0,0, 0.66)
         )
@@ -59,7 +76,13 @@ class Fake_Building(Button):
         if self.built_billding:
             self.remove()
             self.go_to_R_store = True
-        print('click')
+            res = requests.post(URL+'chain/add_block', data=json.dumps({
+                            'Sender': 'USER',
+                            'Receiver': 'ChainSERVER',
+                            'Map Position': tuple(self.render_position),
+                        }))
+            show_alarm_window('  '*(int(len(res.text)/2.07))+'MAP TOKEN\n\n'+res.text)
+            mouse.locked = False
     
 class store_Building(Entity):
     def __init__(self):
@@ -99,6 +122,8 @@ player = SkyViewCamera(x=5, y=7, z=-3, origin_y=10, rotation=(30,10,0))
 
 FPS_player_lock = False
 
+URL = 'http://127.0.0.1:5000/'
+
 def update():
     if FPS_player_lock == False:
         x = 0
@@ -117,6 +142,7 @@ def update():
                 else:
                     j.on_mouse_exit()
                     F_store.highlight_color=color.color(0,0,0,0.50)
+                    F_store.render_position = main_box.position
                     F_store.built_billding = True
                     if F_store.go_to_R_store:
                         R_store.show()
@@ -133,6 +159,5 @@ def input(key):
         for i in maplist:
             for j in i:
                 j.collider = BoxCollider(j, center=(0,0,0), size=(1.5, 0, 1.5))
-
 
 app.run()

@@ -3,7 +3,6 @@ from block import block
 class blockchain:
     def __init__(self):
         self.chain = [] # save all block
-        self.all_transactions = [] # save data chain & transactions
         self.genesis_block()
 
     def genesis_block(self):
