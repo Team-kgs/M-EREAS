@@ -15,7 +15,7 @@ def hello():
 @app.route('/chain/informations', methods=['GET'])
 def chain_info():
     NTF_Token = request.args.get('token')
-    block = Map_NFT.chain
+    block = Map_NFT.chain 
     for i in block:
         if i.hash == NTF_Token:
             response = {
@@ -24,11 +24,11 @@ def chain_info():
                 'timestamp': i.timestamp
             }
             return jsonify(response), 200
-    return "False Token"
+    return "<h2>False Token</h2>"
 
 @app.route('/chain/add_block', methods=['POST'])
 def add_block_in_chain():
     params = json.loads(request.get_data(), encoding='utf-8')
     return Map_NFT.add_block(params).hash
 
-app.run()
+app.run(debug=True)
