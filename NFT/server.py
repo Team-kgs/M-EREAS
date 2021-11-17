@@ -6,6 +6,8 @@ Map_NFT = blockchain()
 
 app = Flask(__name__)
 
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+
 @app.route('/')
 def hello():
     return "<h2>NTF SERVER: INDEX_PAGE</h2>"

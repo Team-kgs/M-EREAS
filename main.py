@@ -1,13 +1,13 @@
 from ursina import *
-from ursina import texture
-from ursina import collider
 from ursina import text
 from ursina.prefabs.first_person_controller import FirstPersonController
 from SkyViewCamera import *
 import requests
 import json
+import random
+import clipboard
 
-Text.default_font = './assets/BMJUA_ttf.ttf'
+Text.default_font = './assets/neodgm.ttf'
 
 class Main_box(Button):
     def __init__(self):
@@ -18,9 +18,9 @@ class Main_box(Button):
             texture='white_cube',
             color=color.color(0,0,random.uniform(0.9,1)),
             highlight_color=color.color(0,0,0.9),
-            scale=1.5*3,
+            scale=1.5*3
         )
-    
+         
     def on_click(self):
         self.open_field = False
 
@@ -46,19 +46,6 @@ class Voxel(Button):
         self.scale=1.5
         self.lock_on_mouse = False
 
-class alarm_window(Text):
-    def __init__(self, alarm_str):
-        super().__init__(
-            parent=camera.ui,
-            text=alarm_str,
-            position=(-.425, .1)
-        )
-
-def show_alarm_window(alarm_str):
-    alarm = alarm_window(alarm_str)
-    alarm.create_background(padding=0.05, color=color.black66)  
-    Button(model='quad', parent=alarm, scale=(0.25, 0.1), origin = (-.5,.5), color=color.black66)
-
 class Fake_Building(Button):
     def __init__(self):
         self.built_billding = False
@@ -80,8 +67,10 @@ class Fake_Building(Button):
                             'Sender': 'USER',
                             'Receiver': 'ChainSERVER',
                             'Map Position': tuple(self.render_position),
+                            'Price': str(coin_result.text)
                         }))
-            show_alarm_window('  '*(int(len(res.text)/2.07))+'MAP TOKEN\n\n'+res.text)
+            show_alarm_window(' '*(int(len(res.text)/2.2))+'MAP TOKEN\n\n'+res.text+'\n'*4)
+            clipboard.copy(res.text)
             mouse.locked = False
     
 class store_Building(Entity):
@@ -95,14 +84,13 @@ class store_Building(Entity):
             scale_y=1.1,
             position=(0,0.55,0)
         )
-    
 
 app = Ursina()
 
 maplist = []
-for z in range(13):
+for z in range(15):
     map_m = []
-    for x in range(13):
+    for x in range(15):
         voxel = Voxel((x*1.5, 0, z*1.5))
         voxel.collider = 'box'
         voxel.collider = BoxCollider(voxel, center=(0,0,0), size=(0.7,0,0.7))
@@ -118,9 +106,36 @@ R_store = store_Building()
 R_store.parent = main_box
 R_store.hide()
 McDonald_text = Text(text='McDonald', parent=R_store, position=(-0.14, 0.7), scale=3)
-player = SkyViewCamera(x=5, y=7, z=-3, origin_y=10, rotation=(30,10,0))
+player = SkyViewCamera(x=8, y=7, z=0, origin_y=10, rotation=(30,10,0))
+coin_result = Text(text=str(random.randrange(100, 1001))+' $', color=color.rgb(247, 147, 26), parent=main_box, position=(-.15, .025, 0.09), rotation_x=90, scale=6)   
 
 FPS_player_lock = False
+
+def show_alarm_window(alarm_str):
+    alarm_window = Text(parent=camera.ui, position=(-.425, .1), text=alarm_str)
+    alarm_window.create_background(padding=0.05, color=color.black66)
+    class Accept_Button(Button):
+        def __init__(self, Player_Mode_def, parent_Entity):
+            self.count = 0
+            self.Player_Mode_def = Player_Mode_def
+            self.parent_Entity = parent_Entity
+            super().__init__(
+                model=Quad(radius=.025), 
+                parent=alarm_window, 
+                scale=(0.8, 0.07), 
+                color=color.black66, 
+                position=(0.4, -.123), 
+                text='Accept'
+            )
+
+        def on_click(self):
+            if self.count >= 1:
+                self.Player_Mode_def(player.position)
+                self.remove()
+                self.parent_Entity.remove()
+            self.count += 1
+
+    Accept_Button(Player_Mode, alarm_window)
 
 URL = 'http://127.0.0.1:5000/'
 
@@ -136,7 +151,7 @@ def update():
                     else:
                         j.show()
                     
-                    if x >= 1 and x <= 11 and z >= 1 and z <= 11:
+                    if x >= 1 and x <= 13 and z >= 1 and z <= 13:
                         if j.lock_on_mouse:
                             main_box.position = j.po
                 else:
@@ -148,16 +163,12 @@ def update():
                         R_store.show()
                 z += 1
             x+=1
-    
-    #hit_info = voxel.intersects()
-    #if hit_info.hit:
-    #    voxel.hide()
 
-def input(key):
-    if held_keys['control'] and key == 'r':
-        FirstPersonController()
-        for i in maplist:
-            for j in i:
-                j.collider = BoxCollider(j, center=(0,0,0), size=(1.5, 0, 1.5))
+def Player_Mode(posi):
+    for i in maplist:
+        for j in i:
+            j.collider = BoxCollider(j, center=(0,0,0), size=(1.5, 0, 1.5))
+    p_layer = FirstPersonController()
+    p_layer.position = posi
 
 app.run()
